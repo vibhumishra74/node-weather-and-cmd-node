@@ -82,7 +82,7 @@ let option = (city = 'india')=>{    var options = {
       // console.error('please try again',error.toJSON().message);
       console.error('please type search key words and try again..');
     });
-let port = 3000;
+let port = process.env.PORT || 3000;
 app.listen(port,()=>{
   console.log(`port listing at ${port}`);
 })
