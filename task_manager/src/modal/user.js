@@ -4,12 +4,12 @@ let validater = require("validator");
 const User = mongoose.model("User", {
   name: {
     type: String,
-    require: true, //validation from mongoose
+    required: true, //validation from mongoose
     trim: true,
   },
   email: {
     type: String,
-    require: true,
+    required: true,
     trim: true,
     lowercase: true,
     validate(value) {
