@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
 let validater = require("validator");
+let bcrypt = require("bcrypt");
 
-const User = mongoose.model("User", {
+const userSchema = mongoose.Schema({
+  // here userSchema is middleware
   name: {
     type: String,
     required: true, //validation from mongoose
@@ -41,5 +43,16 @@ const User = mongoose.model("User", {
     },
   },
 });
+userSchema.pre("save", async function (next) {
+  //not arrow function because it does't bind the function
+  let user = this; //this give all individual object to save
+  //isModified from mongoose to validate
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(user.password, 8);
+  }
+  console.log("password", this.password);
+  next();
+});
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
