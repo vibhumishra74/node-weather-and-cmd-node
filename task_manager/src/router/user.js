@@ -24,6 +24,19 @@ router.post("/users", async (req, res) => {
   }
 });
 
+//login user
+
+router.post("/users/login", async (req, res) => {
+  try {
+    let user = await User.findByCredential(req.body.email, req.body.password);
+    console.log("userlog>>>", user);
+    res.send(user);
+    console.log("email log send", res.send(user));
+  } catch (e) {
+    res.status(404).send(e);
+  }
+});
+
 // read users
 
 router.get("/users", async (req, res) => {
