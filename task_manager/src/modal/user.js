@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     minlength: 7,
     required: true,
-    lowercase: true,
+    // lowercase: true,
     validate(value) {
       let srt = value;
       if (srt.toLowerCase().includes("password"))
@@ -56,13 +56,7 @@ userSchema.statics.findByCredential = async (email, password) => {
   }
   // await pass(password, user.password);
   // const Pass = "$2b$08$sribdt7jrv0r90kauk/w2otqm/8ptfobsbvuhbytgxzyxssjx05mi";
-  const ismatch = await bcrypt.compare(
-    password,
-    user.password,
-    function (err, res) {
-      console.log("err", err, "res", res);
-    }
-  );
+  const ismatch = await bcrypt.compare(password.toLowerCase(), user.password);
   console.log("object user>", user.password, ismatch, password);
   if (!ismatch) {
     throw new Error("unable to login with password");
@@ -78,6 +72,7 @@ userSchema.pre("save", async function (next) {
   //isModified from mongoose to validate
   console.log("hash password", user.password);
   if (user.isModified("password")) {
+    user.hashpassword = await bcrypt.hash(user.password, 8);
     user.password = await bcrypt.hash(user.password, 8);
   }
   console.log("password", this.password);
@@ -88,11 +83,13 @@ const User = mongoose.model("User", userSchema);
 
 module.exports = User;
 
-async function pass(plan, bcrypts) {
+async function pass() {
   // const becry = await bcrypt.hash(plan, 8);
-  const com = await bcrypt.compare(plan, bcrypts);
-  console.log("compare....", com, bcrypts);
-  // const becry = await bcrypt.hash("hello1234", 8);
-  // const com = await bcrypt.compare("hello1234", becry);
-  // console.log("compare", com, becry);
+  // const com = await bcrypt.compare(plan, bcrypts);
+  // console.log("compare....", com, bcrypts);
+  const becry = await bcrypt.hash("hello1234", 8);
+  const com = await bcrypt.compare("hello1234", becry);
+  console.log("compare", com, becry);
 }
+
+pass();

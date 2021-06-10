@@ -7,6 +7,7 @@ let router = new express.Router();
 router.post("/users", async (req, res) => {
   // console.log("user from postman", req.body);
   const user = new User(req.body);
+
   // user
   //   .save()
   //   .then(() => {
@@ -31,7 +32,6 @@ router.post("/users/login", async (req, res) => {
     let user = await User.findByCredential(req.body.email, req.body.password);
     console.log("userlog>>>", user);
     res.send(user);
-    console.log("email log send", res.send(user));
   } catch (e) {
     res.status(404).send(e);
   }
