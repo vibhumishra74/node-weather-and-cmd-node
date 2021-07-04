@@ -72,10 +72,13 @@ router.get("/tasks", auth, async (req, res) => {
   try {
     let task = await Task.find({
       owner: req.user._id,
+
       completed: req.query.completed,
+      // ? req.query.completed : completed,
     })
       .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .skip((page - 1) * limit)
+      .sort({ createdAt: -1 });
     // await req.user
     // .populate({ path: "tasks", match: { completed: true } })
     // .execPopulate(); // this one work
