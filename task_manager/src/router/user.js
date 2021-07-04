@@ -1,5 +1,6 @@
 let express = require("express");
 let User = require("../modal/user");
+let auth = require("../middleware/auth");
 
 let router = new express.Router();
 
@@ -18,8 +19,10 @@ router.post("/users", async (req, res) => {
   // code with async await --->>>
 
   try {
+    let token = await user.generateAuthToken();
     await user.save();
-    res.send(user);
+    console.log("user token", token);
+    res.status(201).send({ user, token });
   } catch (e) {
     res.status(404).send(e);
   }
@@ -30,10 +33,38 @@ router.post("/users", async (req, res) => {
 router.post("/users/login", async (req, res) => {
   try {
     let user = await User.findByCredential(req.body.email, req.body.password);
-    console.log("userlog>>>", user);
-    res.send(user);
+    const token = await user.generateAuthToken();
+    // console.log("userlog>>>", user, token);
+    // res.send({ user: user.getpublicprofile(), token });// hode password and token with help of function/method
+    res.send({ user, token }); //hiding with helpto toJSON method
   } catch (e) {
-    res.status(404).send(e);
+    res.status(404).send("no user found" + e);
+  }
+});
+
+//logout
+
+router.post("/users/logout", auth, async (req, res) => {
+  try {
+    req.user.tokens = req.user.tokens.filter(
+      (token) => token.token !== req.token
+    );
+    console.log("logout");
+    await req.user.save();
+    res.send("your are logout from current account");
+  } catch (e) {
+    res.status(500).send();
+  }
+});
+
+//logout All
+router.post("/users/logoutall", auth, async (req, res) => {
+  try {
+    req.user.tokens = [];
+    await req.user.save();
+    res.send("logout from all device");
+  } catch (error) {
+    res.status(500).send(error);
   }
 });
 
@@ -57,6 +88,28 @@ router.get("/users", async (req, res) => {
   } catch (e) {
     res.status(500).send(e);
   }
+});
+router.get("/users/me", auth, async (req, res) => {
+  let _id = req.params.id;
+  // console.log(_id);
+  // User.find()
+  //   .then((user) => {
+  //     if (!user) {
+  //       return res.status(400).send("no user found");
+  //     }
+  //     res.send(user);
+  //   })
+  //   .catch((e) => res.status(500).send());
+
+  // try {
+  //   let user = await User.find();
+  //   res.send(user);
+  // } catch (e) {
+  //   res.status(500).send(e);
+  // }
+
+  //user taken from auth verification
+  res.send(req.user);
 });
 
 //read user
@@ -116,18 +169,59 @@ router.patch("/users/:id", async (req, res) => {
     res.status(400).send(e);
   }
 });
+//witha auth
+router.patch("/users/me", auth, async (req, res) => {
+  let _Id = req.params.id;
+
+  let updates = Object.keys(req.body); // this will give key to update
+  // console.log("object updates", updates);
+  const allowedUpdate = ["name", "email", "password", "age"];
+  const isValid = updates.every((update) => allowedUpdate.includes(update));
+
+  if (!isValid) {
+    return res.status(404).send("update the correct value");
+  }
+
+  try {
+    // const user = await User.findByIdAndUpdate(_Id, req.body, {
+    //   new: true,
+    //   runValidators: true,
+    // });
+
+    updates.forEach((update) => {
+      req.user[update] = req.body[update];
+    });
+    await req.user.save();
+    res.send(req.user);
+  } catch (e) {
+    res.status(400).send(e);
+  }
+});
 
 // delete user
 
 router.delete("/users/:id", async (req, res) => {
   try {
     let user = await User.findByIdAndDelete(req.params.id);
+    let deletedTask = await user.deletetask();
     if (!user) {
       return res.status(404).send("no user found");
     }
-    res.send(user);
+    res.send({ user, deletedTask });
   } catch (e) {
     res.status(500).send(e);
+  }
+});
+
+//with help of auth
+router.delete("/users/me", auth, async (req, res) => {
+  console.log("req.user", req.user);
+  try {
+    await req.user.remove();
+    res.send(req.user);
+  } catch (e) {
+    console.log("req.user error", req.user);
+    res.status(500).send(e, "error");
   }
 });
 
