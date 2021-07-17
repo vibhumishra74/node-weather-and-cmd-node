@@ -124,7 +124,7 @@ let upload = multer({
     // if (!file.originalname.endsWith("JPG")) {
     //   cb(new Error("Please upload a jpg file"));
     // }
-    if (!file.originalname.match(/\.(jpg|JPG|doc|docx|png)$/)) {
+    if (!file.originalname.match(/\.(jpg|JPG|doc|docx|png|jpeg)$/)) {
       cb(new Error("Please upload a jpg,doc,docx file"));
     }
     cb(undefined, true);
