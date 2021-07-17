@@ -1,6 +1,7 @@
 let express = require("express");
 let User = require("../modal/user");
 let auth = require("../middleware/auth");
+let multer = require("multer");
 
 let router = new express.Router();
 
@@ -110,6 +111,38 @@ router.get("/users/me", auth, async (req, res) => {
 
   //user taken from auth verification
   res.send(req.user);
+});
+
+//upload user avatar
+
+let upload = multer({
+  dest: "images",
+  limits: {
+    fileSize: 2000000, // equal ro 2mb
+  },
+  fileFilter(req, file, cb) {
+    // if (!file.originalname.endsWith("JPG")) {
+    //   cb(new Error("Please upload a jpg file"));
+    // }
+    if (!file.originalname.match(/\.(jpg|JPG|doc|docx|png)$/)) {
+      cb(new Error("Please upload a jpg,doc,docx file"));
+    }
+    cb(undefined, true);
+  },
+});
+
+router.post(
+  "/users/me/avatar",
+  upload.single("upload3"),
+  (req, res) => {
+    res.send("upload success");
+  },
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+  }
+);
+router.post("/user/me/avatar", upload.single("avatar"), (req, res) => {
+  res.send("");
 });
 
 //read user

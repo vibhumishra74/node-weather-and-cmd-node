@@ -232,3 +232,29 @@ router.delete("/tasks/:id", async (req, res) => {
 });
 
 module.exports = router;
+
+// couponGeneration
+// function couponGen() {
+//   let coupon;
+//   let possible = "abcdefghijklmnpqr123456789";
+//   console.log(
+//     "hello",
+//     possible.charAt(Math.floor(Math.random() * possible.length))
+//   );
+//   for (let i = 0; i <= 10; i++) {
+//     coupon += possible.charAt(Math.floor(Math.random() * possible.length));
+//   }
+//   return console.log("coupon>>", coupon !== undefined ? coupon : "updating");
+// }
+
+// couponGen();
+
+let multer = require("multer");
+
+let upload = multer({
+  dest: "images",
+});
+
+router.post("/upload", upload.single("upload1"), (req, res) => {
+  res.send("success");
+});
