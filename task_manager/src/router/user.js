@@ -2,6 +2,7 @@ let express = require("express");
 let User = require("../modal/user");
 let auth = require("../middleware/auth");
 let multer = require("multer");
+const sharp = require("sharp");
 
 let router = new express.Router();
 
@@ -116,7 +117,7 @@ router.get("/users/me", auth, async (req, res) => {
 //upload user avatar
 
 let upload = multer({
-  dest: "images",
+  // dest: "images",
   limits: {
     fileSize: 2000000, // equal ro 2mb
   },
@@ -133,14 +134,41 @@ let upload = multer({
 
 router.post(
   "/users/me/avatar",
+  auth,
   upload.single("upload3"),
-  (req, res) => {
+  async (req, res) => {
+    const buffer = await sharp(req.file.buffer)
+      .resize({ width: 250, height: 250 })
+      .png()
+      .toBuffer();
+    // req.user.avatar = req.file.buffer; // file.buffer only acces when there is no buffer
+    req.user.avatar = buffer;
+    await req.user.save();
     res.send("upload success");
   },
   (error, req, res, next) => {
     res.status(400).send({ error: error.message });
   }
 );
+// get profile image
+router.get("/users/:id/avatar", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user || !user.avatar) {
+      throw new Error("no user or profile found");
+    }
+    res.set("Content-Type", "image/png"); // bcz sharp change the formate at time of save
+    // res.set("Content-Type", "image/jpg");
+    res.send(user.avatar);
+  } catch (e) {
+    res.status(404).send();
+  }
+});
+router.delete("/users/me/avatar", auth, async (req, res) => {
+  req.user.avatar = undefined;
+  await req.user.save();
+  res.send("profile deleted");
+});
 router.post("/user/me/avatar", upload.single("avatar"), (req, res) => {
   res.send("");
 });
