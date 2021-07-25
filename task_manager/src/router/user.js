@@ -3,6 +3,7 @@ let User = require("../modal/user");
 let auth = require("../middleware/auth");
 let multer = require("multer");
 const sharp = require("sharp");
+const { welcomeemail, goodbuy } = require("../email/account");
 
 let router = new express.Router();
 
@@ -23,6 +24,7 @@ router.post("/users", async (req, res) => {
   try {
     let token = await user.generateAuthToken();
     await user.save();
+    welcomeemail(user.email, user.name);
     console.log("user token", token);
     res.status(201).send({ user, token });
   } catch (e) {
@@ -268,6 +270,7 @@ router.delete("/users/:id", async (req, res) => {
     if (!user) {
       return res.status(404).send("no user found");
     }
+    await goodbuy(user.email, user.name);
     res.send({ user, deletedTask });
   } catch (e) {
     res.status(500).send(e);
@@ -278,6 +281,7 @@ router.delete("/users/:id", async (req, res) => {
 router.delete("/users/me", auth, async (req, res) => {
   console.log("req.user", req.user);
   try {
+    await goodbuy(req.user.email, req.user.name);
     await req.user.remove();
     res.send(req.user);
   } catch (e) {
