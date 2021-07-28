@@ -2,9 +2,9 @@ let express = require("express");
 require("./db/mongose");
 let userRouter = require("./router/user");
 let taskRouter = require("./router/task");
-
+// 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
 let app = express();
-let port = process.env.PORT;
+let port = process.env.PORT || 3000;
 
 // express middle ware
 

@@ -103,7 +103,7 @@ userSchema.methods.toJSON = function () {
 
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
-  const token = jwt.sign({ _Id: user._id.toString() }, process.env.JWTCODE);
+  const token = jwt.sign({ _Id: user._id.toString() }, "secretkey");
   // console.log("user token in function", user);
   //user.token is from modal tokal
   user.tokens = user.tokens.concat({ token });

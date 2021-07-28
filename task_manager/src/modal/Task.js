@@ -31,7 +31,7 @@ let TaskSchema = new mongoose.Schema(
 
 TaskSchema.methods.getAuthToken = async function () {
   let task = this;
-  const token = jwt.sign({ _Id: task._id }, process.env.JWTCODE);
+  const token = jwt.sign({ _Id: task._id }, "secretkey");
   task.tokens = task.tokens.concat({ token });
   await task.save();
   return task;
