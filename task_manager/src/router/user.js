@@ -6,7 +6,9 @@ const sharp = require("sharp");
 const { welcomeemail, goodbuy } = require("../email/account");
 
 let router = new express.Router();
-
+router.get("/", (req, res) => {
+  res.send("welcome to todo task app");
+});
 // user creation
 router.post("/users", async (req, res) => {
   // console.log("user from postman", req.body);
